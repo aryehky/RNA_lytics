@@ -6,129 +6,100 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Plot from 'react-plotly.js';
-import { PlotControls } from "./PlotControls";
+import React, { useEffect, useRef } from 'react';
+import * as d3 from 'd3';
 import { BarChart } from "lucide-react";
-import { validateJson } from "@/lib/jsonValidator";
-import { volcanoPlotSchema } from "@/lib/schemas";
-import { JSONSchemaType } from "ajv";
 
-interface DataPoint {
-  gene: string;
-  logFC: number;
-  pValue: number;
+interface Gene {
+  gene_id: string;
+  log2FoldChange: number;
+  padj: number;
+  significant: boolean;
 }
 
-export const VolcanoPlot: React.FC = () => {
-  const [pValueThreshold, setPValueThreshold] = useState<number>(0.05);
-  const [fcThreshold, setFcThreshold] = useState<number>(1.5);
-  const [plotData, setPlotData] = useState<DataPoint[]>([]);
+interface VolcanoPlotProps {
+  data: Gene[];
+  width?: number;
+  height?: number;
+  treatment: string;
+}
+
+export const VolcanoPlot: React.FC<VolcanoPlotProps> = ({
+  data,
+  width = 800,
+  height = 600,
+  treatment
+}) => {
+  const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    // Fetch your data here
-    const fetchData = async () => {
-      try {
-        const response = await fetch('/api/differential-expression');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
+    if (!data || !svgRef.current) return;
 
-        const validationErrors = validateJson(data, volcanoPlotSchema as JSONSchemaType<any>);
-        if (validationErrors) {
-          console.error('Validation errors:', validationErrors);
-          return;
-        }
+    // Clear existing plot
+    d3.select(svgRef.current).selectAll("*").remove();
 
-        setPlotData(data);
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error('Error details:', error.message);
-        } else {
-          console.error('Unknown error:', error);
-        }
-      }
-    };
-    fetchData();
-  }, []);
+    const margin = { top: 40, right: 30, bottom: 60, left: 60 };
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
 
-  const getPlotlyData = () => {
-    const significant = plotData.filter(
-      d => Math.abs(d.logFC) >= Math.log2(fcThreshold) && d.pValue <= pValueThreshold
-    );
-    const nonsignificant = plotData.filter(
-      d => Math.abs(d.logFC) < Math.log2(fcThreshold) || d.pValue > pValueThreshold
-    );
+    // Create scales
+    const xScale = d3.scaleLinear()
+      .domain(d3.extent(data, d => d.log2FoldChange) as [number, number])
+      .range([0, innerWidth]);
 
-    return [
-      {
-        x: significant.map(d => d.logFC),
-        y: significant.map(d => -Math.log10(d.pValue)),
-        mode: 'markers',
-        type: 'scatter',
-        name: 'Significant',
-        marker: {
-          color: '#ff1493',
-          size: 8
-        },
-        text: significant.map(d => d.gene),
-        hoverinfo: 'text+x+y'
-      },
-      {
-        x: nonsignificant.map(d => d.logFC),
-        y: nonsignificant.map(d => -Math.log10(d.pValue)),
-        mode: 'markers',
-        type: 'scatter',
-        name: 'Non-significant',
-        marker: {
-          color: '#808080',
-          size: 6
-        },
-        text: nonsignificant.map(d => d.gene),
-        hoverinfo: 'text+x+y'
-      }
-    ];
-  };
+    const yScale = d3.scaleLinear()
+      .domain([0, d3.max(data, d => -Math.log10(d.padj)) as number])
+      .range([innerHeight, 0]);
 
-  return (
-    <div className="p-6 border-t-4 border-t-purple-500">
-      <div className="flex items-center gap-2 mb-6">
-        <BarChart className="h-5 w-5 text-purple-500" />
-        <h2 className="text-xl font-semibold">Differential Expression Analysis</h2>
-      </div>
+    // Create SVG
+    const svg = d3.select(svgRef.current)
+      .attr('width', width)
+      .attr('height', height);
 
-      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 h-[calc(100vh-24rem)]">
-        <PlotControls
-          type="volcano"
-          pValueThreshold={pValueThreshold}
-          fcThreshold={fcThreshold}
-          onPValueChange={setPValueThreshold}
-          onFcChange={setFcThreshold}
-        />
+    const g = svg.append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
 
-        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg h-[calc(100%-4rem)] flex items-center justify-center border border-slate-200 dark:border-slate-700">
-          {plotData.length > 0 ? (
-            <Plot
-              data={getPlotlyData() as Plotly.Data[]}
-              layout={{
-                title: 'Volcano Plot',
-                xaxis: { title: 'Log2 Fold Change' },
-                yaxis: { title: '-log10(p-value)' },
-                showlegend: true,
-                plot_bgcolor: 'transparent',
-                paper_bgcolor: 'transparent'
-              }}
-              useResizeHandler={true}
-              style={{ width: '100%', height: '100%' }}
-            />
-          ) : (
-            <p className="text-muted-foreground">Loading data...</p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+    // Add axes
+    g.append('g')
+      .attr('transform', `translate(0,${innerHeight})`)
+      .call(d3.axisBottom(xScale))
+      .append('text')
+      .attr('x', innerWidth / 2)
+      .attr('y', 40)
+      .attr('fill', 'black')
+      .text('log2 Fold Change');
+
+    g.append('g')
+      .call(d3.axisLeft(yScale))
+      .append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('y', -40)
+      .attr('x', -innerHeight / 2)
+      .attr('fill', 'black')
+      .text('-log10(adjusted p-value)');
+
+    // Add points
+    g.selectAll('circle')
+      .data(data)
+      .enter()
+      .append('circle')
+      .attr('cx', d => xScale(d.log2FoldChange))
+      .attr('cy', d => yScale(-Math.log10(d.padj)))
+      .attr('r', 3)
+      .attr('fill', d => d.significant ? '#dc3545' : '#6c757d')
+      .attr('opacity', 0.6);
+
+    // Add title
+    svg.append('text')
+      .attr('x', width / 2)
+      .attr('y', margin.top / 2)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '16px')
+      .text(`Volcano Plot: ${treatment} vs Control`);
+
+  }, [data, width, height, treatment]);
+
+  return <svg ref={svgRef}></svg>;
 };
 
 export default VolcanoPlot;
