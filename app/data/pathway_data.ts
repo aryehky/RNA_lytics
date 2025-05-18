@@ -1,9 +1,3 @@
-/**
- * @title Pathway Data
- * @fileoverview Pathway data
- * @path /app/data/pathway_data.ts
- */
-
 export interface PathwayNode {
   id: string;
   label: string;

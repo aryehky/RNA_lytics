@@ -1,9 +1,3 @@
-/**
- * @title Chord Diagram Data
- * @fileoverview Chord diagram data
- * @path /app/data/chord_data.ts
- */
-
 export interface ChordNode {
     id: string;
     group: string;

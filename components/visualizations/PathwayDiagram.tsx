@@ -1,9 +1,3 @@
-/**
- * @title Pathway Diagram
- * @fileoverview Pathway diagram component
- * @path /components/visualizations/PathwayDiagram.tsx
- */
-
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
