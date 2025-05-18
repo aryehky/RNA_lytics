@@ -1,3 +1,9 @@
+/**
+ * @title Visualizations Page
+ * @fileoverview Visualizations page component
+ * @path /app/visualizations/page.tsx
+ */
+
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
@@ -58,7 +64,7 @@ const visualizations: Visualization[] = [
   },
 ];
 
-export const dynamic = "force-dynamic";
+export const dynamicPage = "force-dynamic";
 export const runtime = "edge";
 
 export default function VisualizationsPage() {
@@ -145,3 +151,4 @@ export default function VisualizationsPage() {
     </div>
   );
 }
+
