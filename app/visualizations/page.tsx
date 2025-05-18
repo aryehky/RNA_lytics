@@ -1,9 +1,3 @@
-/**
- * @title Visualizations Page
- * @fileoverview Visualizations page component
- * @path /app/visualizations/page.tsx
- */
-
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";

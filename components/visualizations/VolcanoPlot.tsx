@@ -1,9 +1,3 @@
-/**
- * @title Volcano Plot
- * @fileoverview Volcano plot component
- * @path /components/visualizations/VolcanoPlot.tsx
- */
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -26,7 +20,7 @@ export const VolcanoPlot: React.FC = () => {
     // Fetch your data here
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/routes/differential-expression');
+        const response = await fetch('/api/data/differential-expression');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
