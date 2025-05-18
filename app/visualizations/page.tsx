@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 type Visualization = {
   id: string;
   label: string;
-  component: React.ComponentType;
+  component: () => JSX.Element;
   icon: LucideIcon;
   description: string;
 };
