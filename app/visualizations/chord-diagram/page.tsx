@@ -3,10 +3,10 @@
  * @fileoverview Chord diagram page
  * @path /app/visualizations/chord-diagram/page.tsx
  */
-/*
+
 "use client";
 import React, { useState, useEffect } from 'react';
-import { PlotControls } from "@/components//PlotControls";
+import { PlotControls } from "@/components/PlotControls";
 import { validateJson } from "@/lib/jsonValidator";
 import { chordDiagramSchema } from "@/lib/schemas";
 import { JSONSchemaType } from "ajv";
@@ -152,7 +152,7 @@ const ChordDiagramPage: React.FC = () => {
                 style={{ maxWidth: '100%' }}
             >
                 <g transform={`translate(${centerX},${centerY})`}>
-                    {/* Render chord paths *
+                    {/* Render chord paths */}
                     <g className="chord-chart-chords">
                         {localData.data && localData.data.links && localData.data.links.map((link, index) => {
                             if (!localData.data) return null; // Check if localData.data is null
@@ -179,7 +179,7 @@ const ChordDiagramPage: React.FC = () => {
                         })}
                     </g>
 
-                    {/* Render labels *
+                    {/* Render labels */}
                     {localData.data?.nodes.map((node: { id: string; group: string; color: string }, index: number) => {
                         const angle = (index * 360) / (localData.data?.nodes.length || 1); // Fallback to 1 to avoid division by zero
                         const labelRadius = radius + 20; // Adjust label radius as needed
@@ -208,7 +208,7 @@ const ChordDiagramPage: React.FC = () => {
                     })}
                 </g>
 
-                 {/* Legend *
+                {/* Legend */}
                 <g className="legend" transform="translate(20, 955)">
                     {Object.entries(groupColorMapping).map(([group, color], index) => (
                         <g key={group} transform={`translate(0, ${index * 25})`}>
@@ -226,4 +226,3 @@ const ChordDiagramPage: React.FC = () => {
 
 export default ChordDiagramPage;
 
-*/
