@@ -1,9 +1,3 @@
-/**
- * @title Volcano Plot
- * @fileoverview Volcano plot component
- * @path /components/visualizations/VolcanoPlot.tsx
- */
-
 "use client";
 
 import React, { useState, useEffect } from "react";

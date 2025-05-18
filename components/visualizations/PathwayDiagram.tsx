@@ -1,9 +1,3 @@
-/**
- * @title Pathway Diagram
- * @fileoverview Pathway diagram component
- * @path /components/visualizations/PathwayDiagram.tsx
- */
-
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -51,7 +45,7 @@ export const PathwayDiagram: React.FC = () => {
       }
       
       const graphData = {
-        nodes: data.nodes.map((node: { id: string; label?: string; group: string; [key: string]: unknown }) => ({
+        nodes: data.nodes.map((node: { id: string; label?: string; [key: string]: unknown }) => ({
           ...node,
           id: node.id
         })),
@@ -96,10 +90,7 @@ export const PathwayDiagram: React.FC = () => {
               graphData={pathwayData}
               width={dimensions.width}
               height={400}
-              nodeColor={node => {
-                // Get the color based on the node's group from metadata
-                return pathwayData.metadata.groups[node.group]?.color || "#9333ea"; // Default to purple if group not found
-              }}
+              nodeColor={() => "#9333ea"}
               nodeRelSize={6}
               linkColor={() => "#cbd5e1"}
               linkWidth={1}
